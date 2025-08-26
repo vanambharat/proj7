@@ -4,9 +4,7 @@ pipeline {
         maven 'maven'
     }
     environment {
-        AZURE_CLIENT_ID = credentials('azure-sp').username
-        AZURE_CLIENT_SECRET = credentials('azure-sp').password
-        AZURE_TENANT_ID = credentials('azure-tenant').username
+        // These are global environment variables that are NOT secrets
         AZURE_SUBSCRIPTION_ID = '7f44b397-03e8-463f-bcc4-9c1b2dcf4eac'
         AZURE_LOCATION = 'northeurope'
         APP_NAME = 'lucky-web-app'
@@ -31,26 +29,40 @@ pipeline {
         }
         stage('Login to Azure') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'azure-sp', passwordVariable: 'AZURE_CLIENT_SECRET', usernameVariable: 'AZURE_CLIENT_ID')]) {
-                    withCredentials([string(credentialsId: 'azure-tenant', variable: 'AZURE_TENANT_ID')]) {
-                         sh "az login --service-principal -u ${AZURE_CLIENT_ID} -p ${AZURE_CLIENT_SECRET} --tenant ${AZURE_TENANT_ID}"
-                    }
+                // Use withCredentials to securely inject secrets
+                withCredentials([
+                    usernamePassword(credentialsId: 'azure-sp', usernameVariable: 'AZURE_CLIENT_ID', passwordVariable: 'AZURE_CLIENT_SECRET'),
+                    string(credentialsId: 'azure-tenant', variable: 'AZURE_TENANT_ID')
+                ]) {
+                    sh "az login --service-principal -u ${AZURE_CLIENT_ID} -p ${AZURE_CLIENT_SECRET} --tenant ${AZURE_TENANT_ID}"
                 }
             }
         }
         stage('Terraform Apply') {
             steps {
-                dir('infra') {
-                    sh "terraform init"
-                    sh "terraform validate"
-                    sh "terraform plan -out=tfplan"
-                    sh "terraform apply -auto-approve tfplan"
+                // Use withCredentials to securely inject secrets
+                withCredentials([
+                    usernamePassword(credentialsId: 'azure-sp', usernameVariable: 'AZURE_CLIENT_ID', passwordVariable: 'AZURE_CLIENT_SECRET'),
+                    string(credentialsId: 'azure-tenant', variable: 'AZURE_TENANT_ID')
+                ]) {
+                    dir('infra') {
+                        sh "terraform init"
+                        sh "terraform validate"
+                        sh "terraform plan -out=tfplan"
+                        sh "terraform apply -auto-approve tfplan"
+                    }
                 }
             }
         }
         stage('Deploy to Azure Web App') {
             steps {
-                sh "az webapp deploy --resource-group ${RESOURCE_GROUP_NAME} --name ${APP_NAME} --src-path target/luckyspringpetclinic.jar"
+                // Use withCredentials to securely inject secrets
+                withCredentials([
+                    usernamePassword(credentialsId: 'azure-sp', usernameVariable: 'AZURE_CLIENT_ID', passwordVariable: 'AZURE_CLIENT_SECRET'),
+                    string(credentialsId: 'azure-tenant', variable: 'AZURE_TENANT_ID')
+                ]) {
+                    sh "az webapp deploy --resource-group ${RESOURCE_GROUP_NAME} --name ${APP_NAME} --src-path target/luckyspringpetclinic.jar"
+                }
             }
         }
     }
