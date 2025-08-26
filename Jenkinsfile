@@ -1,17 +1,17 @@
 pipeline {
     agent any
     tools {
-        maven 'maven' // This is the name we gave to our Maven installation in Jenkins
+        maven 'maven'
     }
     environment {
-    AZURE_CLIENT_ID = credentials('azure-sp').username
-    AZURE_CLIENT_SECRET = credentials('azure-sp').password
-    AZURE_TENANT_ID = credentials('azure-tenant')
-    AZURE_SUBSCRIPTION_ID = '7f44b397-03e8-463f-bcc4-9c1b2dcf4eac'
-    AZURE_LOCATION = 'northeurope'
-    APP_NAME = 'lucky-web-app'
-    RESOURCE_GROUP_NAME = 'john'
-}
+        AZURE_CLIENT_ID = credentials('azure-sp').username
+        AZURE_CLIENT_SECRET = credentials('azure-sp').password
+        AZURE_TENANT_ID = credentials('azure-tenant').username
+        AZURE_SUBSCRIPTION_ID = '7f44b397-03e8-463f-bcc4-9c1b2dcf4eac'
+        AZURE_LOCATION = 'northeurope'
+        APP_NAME = 'lucky-web-app'
+        RESOURCE_GROUP_NAME = 'john'
+    }
     stages {
         stage('Git Checkout') {
             steps {
@@ -31,7 +31,11 @@ pipeline {
         }
         stage('Login to Azure') {
             steps {
-                sh "az login --service-principal -u ${AZURE_CLIENT_ID} -p ${AZURE_CLIENT_SECRET} --tenant ${AZURE_TENANT_ID}"
+                withCredentials([usernamePassword(credentialsId: 'azure-sp', passwordVariable: 'AZURE_CLIENT_SECRET', usernameVariable: 'AZURE_CLIENT_ID')]) {
+                    withCredentials([string(credentialsId: 'azure-tenant', variable: 'AZURE_TENANT_ID')]) {
+                         sh "az login --service-principal -u ${AZURE_CLIENT_ID} -p ${AZURE_CLIENT_SECRET} --tenant ${AZURE_TENANT_ID}"
+                    }
+                }
             }
         }
         stage('Terraform Apply') {
