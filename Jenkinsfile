@@ -4,14 +4,14 @@ pipeline {
         maven 'maven' // This is the name we gave to our Maven installation in Jenkins
     }
     environment {
-        AZURE_CLIENT_ID = credentials('azure-sp').username
-        AZURE_CLIENT_SECRET = credentials('azure-sp').password
-        AZURE_TENANT_ID = credentials('azure-tenant')
-        AZURE_SUBSCRIPTION_ID = '7f44b397-03e8-463f-bcc4-9c1b2dcf4eac'
-        AZURE_LOCATION = 'northeurope'
-        APP_NAME = 'lucky-web-app'
-        RESOURCE_GROUP_NAME = 'john'
-    }
+    AZURE_CLIENT_ID = credentials('azure-sp').username
+    AZURE_CLIENT_SECRET = credentials('azure-sp').password
+    AZURE_TENANT_ID = credentials('azure-tenant')
+    AZURE_SUBSCRIPTION_ID = '7f44b397-03e8-463f-bcc4-9c1b2dcf4eac'
+    AZURE_LOCATION = 'northeurope'
+    APP_NAME = 'lucky-web-app'
+    RESOURCE_GROUP_NAME = 'john'
+}
     stages {
         stage('Git Checkout') {
             steps {
