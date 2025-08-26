@@ -7,7 +7,7 @@ pipeline {
         // These are global environment variables that are NOT secrets
         AZURE_SUBSCRIPTION_ID = '7f44b397-03e8-463f-bcc4-9c1b2dcf4eac'
         AZURE_LOCATION = 'northeurope'
-        APP_NAME = 'lucky-web-app'
+        APP_NAME = 'lucky-web-app-v2'
         RESOURCE_GROUP_NAME = 'john'
     }
     stages {
