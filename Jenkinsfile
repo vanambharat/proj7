@@ -8,7 +8,7 @@ pipeline {
 
     environment {
         AZURE_CLIENT_ID     = credentials('azure-sp')      // Your Service Principal ID
-        AZURE_CLIENT_SECRET = env.AZURE_CLIENT_ID_PWD // Your Secret
+        AZURE_CLIENT_SECRET = credentials('azure-sp-secret') // Your Secret
         AZURE_TENANT_ID     = credentials('azure-tenant')
         AZURE_SUBSCRIPTION  = "7f44b397-03e8-463f-bcc4-9c1b2dcf4eaic"
     }
